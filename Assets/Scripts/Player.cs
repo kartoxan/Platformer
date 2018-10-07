@@ -15,7 +15,7 @@ public class Player : MonoBehaviour {
     private Transform _transform;
     private Rigidbody2D _rigidbody;
     private Animator _animatorController;
-    private float _walkTime = 0, _walkCooldown = 0.01f;
+    private float _walkTime = 0, _walkCooldown = 0.1f;
 
     public void Start()
     {
