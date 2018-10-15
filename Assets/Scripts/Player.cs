@@ -10,12 +10,18 @@ public class Player : MonoBehaviour {
     public float WalkSpeed = 3;
     public float JumpForce = 10;
 
+    [Header("Jump")]
+    public bool DoubleJump;
+
+    private bool _isGrounded;
     private MoveState _moveState = MoveState.Idle;
     private DirectionState _directionState = DirectionState.Right;
     private Transform _transform;
     private Rigidbody2D _rigidbody;
     private Animator _animatorController;
     private float _walkTime = 0, _walkCooldown = 0.1f;
+    private float _jumpTime = 0, _jampCooldown = 0.1f;
+
 
     public void Start()
     {
@@ -25,11 +31,11 @@ public class Player : MonoBehaviour {
         _directionState = transform.localScale.x > 0 ? DirectionState.Right : DirectionState.Left;
     }
 
-    
+
 
     public void MoveRight()
     {
-        if (_moveState != MoveState.Jump)
+        if (_isGrounded)
         {
             _moveState = MoveState.Walk;
             if (_directionState == DirectionState.Left)
@@ -44,7 +50,7 @@ public class Player : MonoBehaviour {
 
     public void MoveLeft()
     {
-        if (_moveState != MoveState.Jump)
+        if (_isGrounded)
         {
             _moveState = MoveState.Walk;
             if (_directionState == DirectionState.Right)
@@ -59,11 +65,28 @@ public class Player : MonoBehaviour {
 
     public void Jump()
     {
-        if (_moveState != MoveState.Jump)
+        Debug.Log(_jumpTime);
+        Debug.Log(_jumpTime <= 0);
+        if (_isGrounded)
         {
-            _rigidbody.AddForce(new Vector2(_rigidbody.velocity.x,JumpForce),ForceMode2D.Impulse);
+            _isGrounded = false;
+            _rigidbody.AddForce(new Vector2(_rigidbody.velocity.x, JumpForce), ForceMode2D.Impulse);
             _moveState = MoveState.Jump;
             _animatorController.Play("Jump");
+            _jumpTime = _jampCooldown;
+        }
+        else if (DoubleJump && _jumpTime <= 0)
+        {
+            if (_moveState != MoveState.DoubleJump)
+            {
+                if(_rigidbody.velocity.y < 0)
+                {
+                    _rigidbody.AddForce(new Vector2(0, -_rigidbody.velocity.y));
+                }
+                _rigidbody.AddForce(new Vector2(_rigidbody.velocity.x, JumpForce), ForceMode2D.Impulse);
+                _moveState = MoveState.DoubleJump;
+                _animatorController.Play("Jump");
+            }
         }
     }
 
@@ -77,21 +100,25 @@ public class Player : MonoBehaviour {
     private void FixedUpdate()
     {
 
-        if (_moveState == MoveState.Jump)
+        if (!_isGrounded)
         {
+            _jumpTime -= Time.deltaTime;
             if (_rigidbody.velocity == Vector2.zero)
             {
+                _isGrounded = true;
                 Idle();
             }
         }
         else if (_moveState == MoveState.Walk)
         {
-            _rigidbody.velocity = ((_directionState == DirectionState.Right ? Vector2.right : -Vector2.right)
-                                    * WalkSpeed);
+
+            _rigidbody.velocity = _directionState == DirectionState.Right ? new Vector2(WalkSpeed, _rigidbody.velocity.y)
+                                                                           : new Vector2( - WalkSpeed, _rigidbody.velocity.y);
             
             _walkTime -= Time.deltaTime;
             if (_walkTime <= 0)
             {
+                _rigidbody.velocity = Vector2.zero;
                 Idle();
             }
 
@@ -104,11 +131,14 @@ public class Player : MonoBehaviour {
         Left
     }
 
+    
+
     enum MoveState
     {
         Idle,
         Walk,
-        Jump
+        Jump,
+        DoubleJump
     }
 }
 
