@@ -20,7 +20,7 @@ public class Player : MonoBehaviour {
     private Rigidbody2D _rigidbody;
     private Animator _animatorController;
     private float _walkTime = 0, _walkCooldown = 0.1f;
-    private float _jumpTime = 0, _jampCooldown = 0.1f;
+    private float _jumpTime = 0, _jampCooldown = 0.01f;
 
 
     public void Start()

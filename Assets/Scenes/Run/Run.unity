@@ -529,7 +529,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 553684205}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1010587744}
+        m_MethodName: Restart
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &553684205
@@ -575,6 +586,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1010587742}
   - component: {fileID: 1010587743}
+  - component: {fileID: 1010587744}
   m_Layer: 0
   m_Name: Platforms
   m_TagString: Untagged
@@ -616,6 +628,17 @@ MonoBehaviour:
   TexstScore: {fileID: 2076989265}
   GmameOverScore: {fileID: 1226859705}
   gmame: 0
+--- !u!114 &1010587744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1010587741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43e258e1f1dacea4d958cc76958f165e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1020421831
 GameObject:
   m_ObjectHideFlags: 0
@@ -820,7 +843,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u041D\u0430\u0441\u0430\u0442\u044C"
+  m_Text: "\u041D\u0430\u0447\u0430\u0442\u044C"
 --- !u!222 &1317540059
 CanvasRenderer:
   m_ObjectHideFlags: 0

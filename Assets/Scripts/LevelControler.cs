@@ -28,8 +28,9 @@ public class LevelControler : MonoBehaviour {
 	void Update () {
         if(gmame)
         {
-            Score++;
+            Score +=(int) player.WalkSpeed;
             TexstScore.text = Score.ToString();
+            player.WalkSpeed *= 1.00001f;
         }
 
 
