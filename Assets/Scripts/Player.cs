@@ -14,13 +14,14 @@ public class Player : MonoBehaviour {
     public bool DoubleJump;
 
     private bool _isGrounded;
-    private MoveState _moveState = MoveState.Idle;
-    private DirectionState _directionState = DirectionState.Right;
+    private bool _doubleJump;
+    //private MoveState _moveState = MoveState.Idle;
+    //private DirectionState _directionState = DirectionState.Right;
     private Transform _transform;
     private Rigidbody2D _rigidbody;
     private Animator _animatorController;
     private float _walkTime = 0, _walkCooldown = 0.1f;
-    private float _jumpTime = 0, _jampCooldown = 0.01f;
+    private float _jumpTime = 0, _jampCooldown = 0.1f;
 
 
     public void Start()
@@ -28,23 +29,66 @@ public class Player : MonoBehaviour {
         _transform = GetComponent<Transform>();
         _rigidbody = GetComponent<Rigidbody2D>();
         _animatorController = GetComponent<Animator>();
-        _directionState = transform.localScale.x > 0 ? DirectionState.Right : DirectionState.Left;
+        //_directionState = transform.localScale.x > 0 ? DirectionState.Right : DirectionState.Left;
     }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if(collision.gameObject.tag == "Ground")
+        {
+            _isGrounded = true;
+            _doubleJump = DoubleJump;
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.tag == "Ground")
+        {
+            _isGrounded = false;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        _animatorController.SetFloat("HorizontalSpeed", _rigidbody.velocity.x < 0 ? -_rigidbody.velocity.x : _rigidbody.velocity.x);
+        _animatorController.SetFloat("VerticalSpeed", _rigidbody.velocity.y);
+        _animatorController.SetBool("isGround", _isGrounded);
+        if (!_isGrounded)
+        {
+            if (_jumpTime >= 0)
+            {
+                _jumpTime -= Time.deltaTime;
+            }
+
+
+        }
+        else
+        {
+            _rigidbody.velocity = new Vector2(0, _rigidbody.velocity.y);
+        }
+
+        
+    }
+        
 
 
 
     public void MoveRight()
     {
+        
         if (_isGrounded)
         {
-            _moveState = MoveState.Walk;
-            if (_directionState == DirectionState.Left)
+            if(_transform.localScale.x == -1)
             {
-                _transform.localScale = new Vector3(-_transform.localScale.x, _transform.localScale.y, _transform.localScale.z);
-                _directionState = DirectionState.Right;
+                _transform.localScale = new Vector3(-transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-            _walkTime = _walkCooldown;
-            _animatorController.Play("Walk");
+
+            _rigidbody.velocity = new Vector2(WalkSpeed, 0); 
+        }
+        else
+        {
+            _rigidbody.velocity = new Vector2(WalkSpeed, _rigidbody.velocity.y);
         }
     }
 
@@ -52,93 +96,47 @@ public class Player : MonoBehaviour {
     {
         if (_isGrounded)
         {
-            _moveState = MoveState.Walk;
-            if (_directionState == DirectionState.Right)
+            if (_transform.localScale.x == 1)
             {
-                _transform.localScale = new Vector3(-_transform.localScale.x, _transform.localScale.y, _transform.localScale.z);
-                _directionState = DirectionState.Left;
+                _transform.localScale = new Vector3(- transform.localScale.x, transform.localScale.y, transform.localScale.z);
             }
-            _walkTime = _walkCooldown;
-            _animatorController.Play("Walk");
+            _rigidbody.velocity = new Vector2(-WalkSpeed,0);
+
+        }
+        else
+        {
+            _rigidbody.velocity =  new Vector2(-WalkSpeed, _rigidbody.velocity.y);
         }
     }
 
     public void Jump()
     {
-        Debug.Log(_jumpTime);
-        Debug.Log(_jumpTime <= 0);
         if (_isGrounded)
         {
+            _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
+            _rigidbody.AddForce(new Vector2( 0 , JumpForce), ForceMode2D.Impulse);
+            Debug.Log(_rigidbody.velocity.y);
             _isGrounded = false;
-            _rigidbody.AddForce(new Vector2(_rigidbody.velocity.x, JumpForce), ForceMode2D.Impulse);
-            _moveState = MoveState.Jump;
-            _animatorController.Play("Jump");
             _jumpTime = _jampCooldown;
         }
         else if (DoubleJump && _jumpTime <= 0)
         {
-            if (_moveState != MoveState.DoubleJump)
+            if (_doubleJump)
             {
                 if(_rigidbody.velocity.y < 0)
                 {
-                    _rigidbody.AddForce(new Vector2(0, -_rigidbody.velocity.y));
+                    _rigidbody.AddForce(new Vector2(0, 0));
                 }
-                _rigidbody.AddForce(new Vector2(_rigidbody.velocity.x, JumpForce), ForceMode2D.Impulse);
-                _moveState = MoveState.DoubleJump;
-                _animatorController.Play("Jump");
+                _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
+                _doubleJump = !_doubleJump;
             }
         }
     }
 
-    private void Idle()
-    {
-        _moveState = MoveState.Idle;
-        _animatorController.Play("Idle");
-    }
 
-
-    private void FixedUpdate()
-    {
-
-        if (!_isGrounded)
-        {
-            _jumpTime -= Time.deltaTime;
-            if (_rigidbody.velocity == Vector2.zero)
-            {
-                _isGrounded = true;
-                Idle();
-            }
-        }
-        else if (_moveState == MoveState.Walk)
-        {
-
-            _rigidbody.velocity = _directionState == DirectionState.Right ? new Vector2(WalkSpeed, _rigidbody.velocity.y)
-                                                                           : new Vector2( - WalkSpeed, _rigidbody.velocity.y);
-            
-            _walkTime -= Time.deltaTime;
-            if (_walkTime <= 0)
-            {
-                _rigidbody.velocity = Vector2.zero;
-                Idle();
-            }
-
-        }
-    }
-
-    enum DirectionState
-    {
-        Right,
-        Left
-    }
 
     
 
-    enum MoveState
-    {
-        Idle,
-        Walk,
-        Jump,
-        DoubleJump
-    }
+
 }
 
