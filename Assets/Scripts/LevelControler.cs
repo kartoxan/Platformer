@@ -6,39 +6,64 @@ using UnityEngine.UI;
 public class LevelControler : MonoBehaviour {
 
     public Player player;
-
-    public GameObject PrefabPlatform;
-    public GameObject PrefabObstacle;
+    public GameObject Connection;
 
     public GameObject GameOverPanel;
+    public Text HighScoreText;
     public Text TexstScore;
-    public Text GmameOverScore;
+    //public Text GmameOverScore;
+
+    public GameObject MainMenu;
+
+    public GameObject SetNmaePnel;
+
+    public List<Text> nameHighScore;
+    public List<Text> HighScores;
+
 
     private int Score;
-    private int numderplatform = 0;
+    private int HighScore;
+
+    public LevelCreator LevelCreator;
+
+    public List<GameObject> Platforms;
+
+    private int PassedPlatforms = 0;
 
     public bool gmame;
 
     // Use this for initialization
     void Start () {
+        HighScore = PlayerPrefs.GetInt("HighScore0");
+        HighScoreText.text = "Ваш рекорд: " + HighScore.ToString();
         GenerateLevel();
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        if(gmame)
+        if (!PlayerPrefs.HasKey("Name"))
         {
-            Score +=(int) player.WalkSpeed;
-            TexstScore.text = Score.ToString();
-            player.WalkSpeed *= 1.00001f;
+            SetNmaePnel.SetActive(true);
         }
+        else
+        {
+            MainMenu.SetActive(true);
+        }
+	}
 
-
-
-
-
-
-
+    // Update is called once per frame
+    private bool temp = true;
+    void Update () {
+        if (gmame)
+        {
+            Score += (int)player.WalkSpeed;
+            TexstScore.text = Score.ToString();
+            player.WalkSpeed *= 1.0001f;
+        }
+        if(player == null)
+        {
+            if (temp)
+            {
+                temp = false;
+                GmameOver();
+            }
+        }
     }
 
     public void StartGame()
@@ -48,21 +73,37 @@ public class LevelControler : MonoBehaviour {
 
     public void GenerateLevel()
     {
-        numderplatform++;
-        GameObject platform = Instantiate(PrefabPlatform);
-        
-        platform.transform.SetParent(transform);
-        platform.transform.position = new Vector3(numderplatform * 20, -5, 0);
-
-
-        for (int i = 0; i < 3; i++)
+        if (true)
         {
-            GameObject Obstacle = Instantiate(PrefabObstacle);
-            Obstacle.transform.SetParent(platform.transform);
-            Obstacle.transform.position = new Vector3(numderplatform * 20 + Random.Range(-10 , 10), Obstacle.transform.position.y, Obstacle.transform.position.z);
-            Obstacle.GetComponent<ObstacleControler>().LC = this;
-        }
+            GameObject Platform = LevelCreator.CreateNextZone();
 
+            Platform.transform.position = transform.GetChild(transform.childCount - 1).transform.position;
+            Platform.transform.position = new Vector3(Platform.transform.position.x + 12, Platform.transform.position.y, Platform.transform.position.z);
+
+            Platform.transform.SetParent(this.transform);
+
+            GameObject Con = Instantiate(Connection);
+
+            ;
+
+            Con.transform.position = transform.GetChild(transform.childCount - 1).transform.position;
+            Con.transform.position = new Vector3(Con.transform.position.x + 12, Con.transform.position.y, Con.transform.position.z);
+
+ 
+            Con.transform.SetParent(this.transform);
+
+            
+        }
+    }
+
+    public void DestroyLevel()
+    {
+        PassedPlatforms++;
+        if (PassedPlatforms > 3)
+        {
+            
+            Destroy(transform.GetChild(0).gameObject);
+        }
     }
 
     public void GmameOver()
@@ -70,6 +111,50 @@ public class LevelControler : MonoBehaviour {
         gmame = false;
         GameOverPanel.SetActive(true);
         TexstScore.text = "";
-        GmameOverScore.text = "Ваш щет: " + Score.ToString();
+        Debug.Log("lol1");
+        bool temp = false;
+        for (int i = 0; i < 3; i++)
+        {
+            if (!temp)
+            {
+                if (PlayerPrefs.HasKey("HighScore" + i))
+                {
+
+                    if (Score > PlayerPrefs.GetInt("HighScore" + i))
+                    {
+                        temp = true;
+                        for (int j = 3; j > i; j--)
+                        {
+                            PlayerPrefs.SetInt("HighScore" + j, PlayerPrefs.GetInt("HighScore" + (j - 1)));
+                            PlayerPrefs.SetString("HighScoreName" + j, PlayerPrefs.GetString("HighScoreName" + (j - 1)));
+                        }
+                        PlayerPrefs.SetInt("HighScore" + i, Score);
+                        PlayerPrefs.SetString("HighScoreName" + i, PlayerPrefs.GetString("Name"));
+                    }
+
+                }
+                else
+                {
+                    Debug.Log("lol");
+                    temp = true;
+                    PlayerPrefs.SetInt("HighScore" + i, Score);
+                    PlayerPrefs.SetString("HighScoreName" + i, PlayerPrefs.GetString("Name"));
+                    HighScores[i].text = PlayerPrefs.GetInt("HighScore" + i).ToString();
+                    nameHighScore[i].text = i + 1 + ". " + PlayerPrefs.GetString("HighScoreName" + i);
+                    break;
+                }
+            }
+            if (PlayerPrefs.HasKey("HighScore" + i))
+            {
+                HighScores[i].text = PlayerPrefs.GetInt("HighScore" + i).ToString();
+                nameHighScore[i].text = i + 1 + ". " + PlayerPrefs.GetString("HighScoreName" + i);
+            }
+
+
+        }
     }
+
+
+    
+
 }

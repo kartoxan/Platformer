@@ -19,13 +19,20 @@ public class PlatformControler : MonoBehaviour {
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        LevelControler controler = transform.parent.GetComponent<LevelControler>();
-        controler.GenerateLevel();
+        if (collision.tag == "Player")
+        {
+            LevelControler controler = transform.parent.GetComponent<LevelControler>();
+            controler.GenerateLevel();
+        }
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        
+        if (collision.tag == "Player")
+        {
+            //LevelControler controler = transform.parent.GetComponent<LevelControler>();
+            //controler.DestroyLevel();
+        }
     }
 
 

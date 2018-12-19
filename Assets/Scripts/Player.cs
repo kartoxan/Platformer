@@ -36,6 +36,7 @@ public class Player : MonoBehaviour {
     {
         if(collision.gameObject.tag == "Ground")
         {
+            _animatorController.SetBool("isGround", _isGrounded);
             _isGrounded = true;
             _doubleJump = DoubleJump;
         }
@@ -45,6 +46,7 @@ public class Player : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Ground")
         {
+            _animatorController.SetBool("isGround", _isGrounded);
             _isGrounded = false;
         }
     }
@@ -113,6 +115,7 @@ public class Player : MonoBehaviour {
     {
         if (_isGrounded)
         {
+            Debug.Log("Jump");
             _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
             _rigidbody.AddForce(new Vector2( 0 , JumpForce), ForceMode2D.Impulse);
             Debug.Log(_rigidbody.velocity.y);
@@ -123,10 +126,7 @@ public class Player : MonoBehaviour {
         {
             if (_doubleJump)
             {
-                if(_rigidbody.velocity.y < 0)
-                {
-                    _rigidbody.AddForce(new Vector2(0, 0));
-                }
+                _rigidbody.velocity = new Vector2(_rigidbody.velocity.x, 0);
                 _rigidbody.AddForce(new Vector2(0, JumpForce), ForceMode2D.Impulse);
                 _doubleJump = !_doubleJump;
             }

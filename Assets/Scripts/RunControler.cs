@@ -25,11 +25,12 @@ public class RunControler : MonoBehaviour {
         {
             if (run)
             {
-                Player.MoveRight();
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     Player.Jump();
                 }
+                Player.MoveRight();
+                
             }
         }
     }
